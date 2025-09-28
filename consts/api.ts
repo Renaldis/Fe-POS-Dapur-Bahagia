@@ -1,7 +1,10 @@
-const RouteApi = {
-  Register: `${process.env.PUBLIC_API}/api/v1/users/register`,
-  Login: `${process.env.PUBLIC_API}/api/v1/users/login`,
-  GetMe: `${process.env.PUBLIC_API}/api/v1/users/me`,
+const AuthApi = {
+  Register: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`,
+  Login: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`,
+  GetMe: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`,
+};
+const OrderApi = {
+  Register: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders`,
 };
 
-export { RouteApi };
+export { AuthApi, OrderApi };

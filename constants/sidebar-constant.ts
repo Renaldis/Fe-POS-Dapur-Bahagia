@@ -10,27 +10,27 @@ export const SIDEBAR_MENU_LIST = {
   admin: [
     {
       title: "Dashboard",
-      url: "/admin",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
       title: "Order",
-      url: "/order",
+      url: "/dashboard/order",
       icon: Album,
     },
     {
       title: "Menu",
-      url: "/admin/menu",
+      url: "/dashboard/menu",
       icon: SquareMenu,
     },
     {
       title: "Table",
-      url: "/admin/table",
+      url: "/dashboard/table",
       icon: Armchair,
     },
     {
       title: "User",
-      url: "/admin/user",
+      url: "/dashboard/user",
       icon: Users,
     },
   ],

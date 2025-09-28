@@ -1,6 +1,6 @@
 "use server";
 
-import { RouteApi } from "@/consts/api";
+import { AuthApi } from "@/consts/api";
 import {
   createUserSchema,
   loginSchemaForm,
@@ -25,7 +25,7 @@ export async function registerUser(formData: FormData) {
   }
 
   try {
-    const res = await fetch(RouteApi.Register, {
+    const res = await fetch(AuthApi.Register, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export async function loginUser(formData: FormData) {
   }
 
   try {
-    const res = await fetch(RouteApi.Login, {
+    const res = await fetch(AuthApi.Login, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
