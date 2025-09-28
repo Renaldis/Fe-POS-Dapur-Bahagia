@@ -22,9 +22,11 @@ import { loginUser } from "../../action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { useAuthStore } from "@/store/auth-store";
 
 const Login = () => {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const form = useForm<z.infer<typeof loginSchemaForm>>({
     resolver: zodResolver(loginSchemaForm),
@@ -38,12 +40,13 @@ const Login = () => {
     });
 
     const res = await loginUser(formData);
-    console.log(res.data);
+
     if (res.success) {
       Cookies.set("user_profile", res.data?.token, { expires: 1 });
+      setUser(res.data.user);
       toast.success("Login Success");
 
-      router.push("/");
+      router.push("/dashboard");
     } else {
       toast.error(res.error || "Login Failed");
     }

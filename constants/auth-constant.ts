@@ -9,3 +9,8 @@ export const INITIAL_LOGIN_USER_FORM = {
   email: "rrr@gmail.com",
   password: "12345678",
 };
+export const INITIAL_STATE_USER = {
+  id: "",
+  name: "",
+  role: "",
+};
