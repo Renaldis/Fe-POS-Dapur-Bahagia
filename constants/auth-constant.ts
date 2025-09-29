@@ -1,12 +1,12 @@
 export const INITIAL_CREATE_USER_FORM = {
   username: "renaldis",
   phone: "089675759858",
-  email: "rrr@gmail.com",
+  email: "renaldis1111@gmail.com",
   password: "12345678",
 };
 
 export const INITIAL_LOGIN_USER_FORM = {
-  email: "rrr@gmail.com",
+  email: "renaldis1111@gmail.com",
   password: "12345678",
 };
 export const INITIAL_STATE_USER = {

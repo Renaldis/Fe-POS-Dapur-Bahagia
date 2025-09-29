@@ -5,49 +5,63 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { HEADER_TABLE_ORDER } from "@/constants/order-constant";
-import useDataTable from "@/hooks/use-data-table";
 import { useQuery } from "@tanstack/react-query";
 import { Ban, Link2Icon, ScrollText } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import DropdownAction from "@/components/common/dropdown-action";
 import Link from "next/link";
 import { Order } from "@/types/orders";
+import useDebounce from "@/hooks/use-debounce";
 
 const OrderManagement = () => {
-  const {
-    currentPage,
-    currentLimit,
-    currentSearch,
-    handleChangePage,
-    handleChangeLimit,
-    handleChangeSearch,
-  } = useDataTable();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentLimit, setCurrentLimit] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const debounce = useDebounce();
 
+  // Debounced search state
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  React.useEffect(() => {
+    debounce(() => setDebouncedSearch(searchInput), 300);
+  }, [searchInput, debounce]);
+
+  // Fetch semua order sekali
   const {
     data: orders,
-    error,
     isLoading,
     isError,
+    error,
   } = useQuery({
-    queryKey: ["orders", currentPage, currentLimit, currentSearch],
+    queryKey: ["orders"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders?page=${currentPage}&limit=${currentLimit}&search=${currentSearch}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders`
       );
       if (!res.ok) throw new Error("Gagal fetch data orders");
       return res.json();
     },
   });
 
-  console.log(orders);
+  const filteredOrders = useMemo(() => {
+    if (!orders?.data) return [];
+    const searchLower = debouncedSearch.toLowerCase();
+    return orders.data.filter(
+      (order: Order) =>
+        order.Customer.username.toLowerCase().includes(searchLower) ||
+        order.Table?.number.toString().includes(searchLower) ||
+        order.orderItems.some((item) =>
+          item.menu.name.toLowerCase().includes(searchLower)
+        )
+    );
+  }, [orders, debouncedSearch]);
 
-  // 🔑 Hitung total pages pakai useMemo sebelum kondisi return
-  const totalPages = useMemo(() => {
-    return orders && orders.count !== null
-      ? Math.ceil(orders.count / currentLimit)
-      : 0;
-  }, [orders, currentLimit]);
+  const totalPages = Math.ceil(filteredOrders.length / currentLimit);
+  const paginatedOrders = useMemo(() => {
+    const start = (currentPage - 1) * currentLimit;
+    const end = start + currentLimit;
+    return filteredOrders.slice(start, end);
+  }, [filteredOrders, currentPage, currentLimit]);
 
   const reservedActionList = [
     {
@@ -57,9 +71,8 @@ const OrderManagement = () => {
           Process
         </span>
       ),
-      action: (orderId: string, tableId: string) => {
-        console.log("Process order", orderId, "on table", tableId);
-      },
+      action: (orderId: string, tableId: string) =>
+        console.log("Process order", orderId, "on table", tableId),
     },
     {
       label: (
@@ -68,15 +81,14 @@ const OrderManagement = () => {
           Cancel
         </span>
       ),
-      action: (orderId: string, tableId: string) => {
-        console.log("Cancel order", orderId, "on table", tableId);
-      },
+      action: (orderId: string, tableId: string) =>
+        console.log("Cancel order", orderId, "on table", tableId),
     },
   ];
 
-  // 🔑 Filtered data juga sebelum return
-  const filteredData = useMemo(() => {
-    return (orders?.data || []).map((order: Order, index: number) => {
+  // Prepare data untuk DataTable
+  const tableData = useMemo(() => {
+    return paginatedOrders.map((order: Order, index: number) => {
       const menuDisplay = order.orderItems.map((item) => (
         <div key={item.id} className="flex justify-between gap-2">
           <span>
@@ -90,27 +102,26 @@ const OrderManagement = () => {
         0
       );
       return [
-        currentLimit * (currentPage - 1) + index + 1,
-        order.id, // pakai id langsung
+        (currentPage - 1) * currentLimit + index + 1,
         order.Customer.username,
         order.Table?.number ?? "-",
-        <div key={`menu-names-${order.id}`} className="flex flex-col">
+        <div key={`menu-${order.id}`} className="flex flex-col">
           {menuDisplay}
         </div>,
-        totalPrice,
+        <div key={`total-${order.id}`}>Rp {totalPrice.toLocaleString()}</div>,
         <div
-          key={order.id}
+          key={`status-${order.id}`}
           className={cn("px-2 py-1 rounded-full text-white w-fit capitalize", {
-            "bg-green-600": order.status === "settle",
-            "bg-sky-600": order.status === "process",
-            "bg-yellow-600": order.status === "pending",
-            "bg-red-600": order.status === "canceled",
+            "bg-green-600": order.status.toLowerCase() === "settle",
+            "bg-sky-600": order.status.toLowerCase() === "process",
+            "bg-yellow-600": order.status.toLowerCase() === "pending",
+            "bg-red-600": order.status.toLowerCase() === "canceled",
           })}
         >
           {order.status}
         </div>,
         <DropdownAction
-          key={`dropdown-action-${order.id}`}
+          key={`dropdown-${order.id}`}
           menu={
             order.status === "pending"
               ? reservedActionList.map((item) => ({
@@ -136,7 +147,7 @@ const OrderManagement = () => {
         />,
       ];
     });
-  }, [orders, currentLimit, currentPage]);
+  }, [paginatedOrders, currentPage, currentLimit]);
 
   if (isLoading) return <p>Loading orders...</p>;
   if (isError) return <p>Error: {(error as Error).message}</p>;
@@ -148,26 +159,25 @@ const OrderManagement = () => {
         <div className="flex gap-2">
           <Input
             placeholder="Search..."
-            value={currentSearch}
-            onChange={(e) => handleChangeSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline">Create</Button>
             </DialogTrigger>
-            {/* <DialogCreateOrder tables={tables} refetch={refetch} /> */}
           </Dialog>
         </div>
       </div>
       <DataTable
         header={HEADER_TABLE_ORDER}
-        data={filteredData}
+        data={tableData}
         isLoading={isLoading}
         totalPages={totalPages}
         currentPage={currentPage}
         currentLimit={currentLimit}
-        onChangePage={handleChangePage}
-        onChangeLimit={handleChangeLimit}
+        onChangePage={setCurrentPage}
+        onChangeLimit={setCurrentLimit}
       />
     </div>
   );

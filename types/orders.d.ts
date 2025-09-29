@@ -1,10 +1,10 @@
-export interface Menu {
+interface Menu {
   name: string;
   price: number;
   description: string;
 }
 
-export interface OrderItem {
+interface OrderItem {
   id: string;
   quantity: number;
   notes: string;
@@ -12,12 +12,12 @@ export interface OrderItem {
   menu: Menu;
 }
 
-export interface Customer {
+interface Customer {
   username: string;
   phone: string;
 }
 
-export interface Table {
+interface Table {
   number: number;
   capacity: number;
 }
@@ -32,4 +32,8 @@ export interface Order {
   Customer: Customer;
   Table: Table;
   orderItems: OrderItem[];
+}
+export interface OrdersResponse {
+  data: Order[];
+  count: number;
 }

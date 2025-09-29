@@ -15,14 +15,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { loginSchemaForm } from "@/validations/auth-validation";
-import { INITIAL_CREATE_USER_FORM } from "@/constants/auth-constant";
+import { INITIAL_LOGIN_USER_FORM } from "@/constants/auth-constant";
 import { Form } from "@/components/ui/form";
 import FormInput from "@/components/common/form-input";
 import { loginUser } from "../../action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { useAuthStore } from "@/store/auth-store";
+import Cookies from "js-cookie";
 
 const Login = () => {
   const router = useRouter();
@@ -30,7 +30,7 @@ const Login = () => {
 
   const form = useForm<z.infer<typeof loginSchemaForm>>({
     resolver: zodResolver(loginSchemaForm),
-    defaultValues: INITIAL_CREATE_USER_FORM,
+    defaultValues: INITIAL_LOGIN_USER_FORM,
   });
 
   const onSubmit = form.handleSubmit(async (values) => {

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import DashboardBreadcrumb from "./_components/dashboard-breadcrumb";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;

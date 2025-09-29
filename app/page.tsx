@@ -1,3 +1,5 @@
-export default function Home() {
-  return <div>Home</div>;
+import Customers from "./(customers)/customers";
+
+export default function CustomerPage() {
+  return <Customers />;
 }

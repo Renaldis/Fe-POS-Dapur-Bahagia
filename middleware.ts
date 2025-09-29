@@ -15,7 +15,7 @@ export function middleware(req: NextRequest) {
 
   // Jika sudah login, jangan biarkan ke login/register
   if (token && PUBLIC_PATHS.includes(url.pathname)) {
-    url.pathname = "/";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

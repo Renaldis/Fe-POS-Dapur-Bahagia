@@ -1,7 +1,8 @@
 import React from "react";
+import MenuManagement from "./_components/menu";
 
 const Menu = () => {
-  return <div>Menu</div>;
+  return <MenuManagement />;
 };
 
 export default Menu;
